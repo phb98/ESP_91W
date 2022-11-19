@@ -1,0 +1,11 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+    {
+      "label": "ESP_GET_IDF",
+      "type": "shell",
+      "command": ". $HOME/esp-idf/export.sh",
+      "problemMatcher": []
+    }
+  ]
+}
