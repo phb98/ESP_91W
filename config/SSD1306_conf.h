@@ -9,4 +9,5 @@
 #define OLED_WIDTH                          (64)
 #define OLED_HEIGHT                         (48)
 #define OLED_COLUMNS                        OLED_WIDTH
+#define OLED_CONTRAST                       0x3F
 #endif

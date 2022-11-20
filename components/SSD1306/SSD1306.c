@@ -79,7 +79,7 @@ void ssd1306_init(void)
   static const uint8_t init4[] = {SSD1306_SETCOMPINS, // 0x20
                                   0x12, // 0x0 act like ks0108
                                   SSD1306_SETCONTRAST,
-                                  0x81};
+                                  OLED_CONTRAST};
   send_cmd(init4, sizeof(init4));
 
   static const uint8_t init5[] = {SSD1306_SETVCOMDETECT, // 0xDB
