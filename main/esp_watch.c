@@ -5,6 +5,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "lv_conf.h"
+#include "ble.h"
 lv_obj_t *label2, *label1;
 LV_FONT_DECLARE(seg7_classic_mini_10);
 LV_FONT_DECLARE(seg7_classic_mini_16);
@@ -12,6 +13,8 @@ LV_FONT_DECLARE(seg7_classic_mini_16);
 void app_main(void)
 {
   display_init();
+  ble_init();
+
   static lv_style_t label_style1, label_style2;
   lv_style_init(&label_style1);
   lv_style_set_text_font(&label_style1, &seg7_classic_mini_10);

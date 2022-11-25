@@ -4,5 +4,6 @@ idf_component_register(SRCS "esp_watch.c"
                                      "../etc"
                                      "../components/display"
                                      "../components/lvgl"
-                       REQUIRES      "lvgl")
+                       REQUIRES      "lvgl"
+                                     "ble")
                                      
