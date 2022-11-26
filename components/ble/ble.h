@@ -30,12 +30,23 @@ typedef struct
 
 typedef struct
 {
-  esp_bt_uuid_t uuid;
+  esp_bt_uuid_t char_uuid;
   uint16_t handle;
   uint16_t cccd_handle;
   uint8_t  prop;
+  uint8_t  is_subcribed;
+  uint8_t  need_subcribe;
 } ble_char_t;
 
+typedef struct
+{
+  esp_bt_uuid_t svc_uuid;
+  uint16_t start_handle;
+  uint16_t end_handle;
+  ble_char_t * char_list;
+  uint16_t num_char;
+  char * svc_name;
+} ble_svc_t;
 typedef void (*ble_evt_cb_t)(ble_evt_t evt);
 void ble_init();
 void ble_gattc_register_cb(ble_evt_cb_t cb);

@@ -6,6 +6,7 @@
 #include "freertos/task.h"
 #include "lv_conf.h"
 #include "ble.h"
+#include "ble_cts.h"
 lv_obj_t *label2, *label1;
 LV_FONT_DECLARE(seg7_classic_mini_10);
 LV_FONT_DECLARE(seg7_classic_mini_16);
@@ -33,15 +34,16 @@ void app_main(void)
   lv_obj_set_pos(lv_bar, 0, 18);
   uint16_t a = 1000;
   uint8_t  sec = 0;
+  ble_cts_time_t current_time = ble_cts_get_time();
   while(1)
   {
     char buffer[16];
+    current_time = ble_cts_get_time();
+    a = current_time.hour * 100 + current_time.min;
     sprintf(buffer, "%02d:%02d", a/100, a%100);
     lv_label_set_text(label2, buffer);
     //lv_label_set_text(label1, "0");
     lv_bar_set_value(lv_bar,sec, LV_ANIM_OFF);
-    sec++;
-    if(sec > 59) {sec = 0; a++;};
-    vTaskDelay(10);
+    vTaskDelay(100);
   }
 }
