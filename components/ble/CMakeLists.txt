@@ -1,5 +1,4 @@
 file(GLOB_RECURSE BLE_SOURCE "*.c")
-message(WARNING ${BLE_SOURCE})
 idf_component_register(SRCS ${BLE_SOURCE}
                       INCLUDE_DIRS  "."
                                      "../lvgl"

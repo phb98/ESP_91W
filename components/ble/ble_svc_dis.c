@@ -8,16 +8,22 @@
 #include "esp_gattc_api.h"
 #include "esp_log.h"
 #include <string.h>
+#include "thread_config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/queue.h"
 #include "freertos/event_groups.h"
+
+/*************************************************************************************/
+/*                                  CONSTANT DEFINE                                  */
+/*************************************************************************************/
 #define MAX_DISCOVERINNG_SVC    (16)
-#define BLE_SVC_DIS_STACK_SIZE  (4096)
 #define BLE_INVALID_HANDLE      (0)
 #define BLE_SVC_DIS_LOGI(...)   ESP_LOGI("BLE_SVC_DIS", __VA_ARGS__);
 #define IS_PROP_SUBCRIABLE(p)   (((p) & ESP_GATT_CHAR_PROP_BIT_NOTIFY) || ((p) & ESP_GATT_CHAR_PROP_BIT_INDICATE))      
-
+/*************************************************************************************/
+/*                                    MODULE TYPE                                    */
+/*************************************************************************************/
 typedef enum
 {
   EVENT_START_DISCOVER  = 1 << 0,
@@ -27,14 +33,16 @@ typedef enum
   EVENT_SVC_FOUND       = 1 << 4,
   EVENT_BLE_DISCONNECT  = 1 << 5,
 } ble_svc_dis_event_t;
-// Module variable
+/*************************************************************************************/
+/*                                  MODULE VARIABLE                                  */
+/*************************************************************************************/
 static struct
 {
   ble_svc_dis_t discovering_service;
   QueueHandle_t queue_handle;
   TaskHandle_t  task_handle;
   StaticTask_t  task_buffer;
-  uint8_t       task_stack[BLE_SVC_DIS_STACK_SIZE];
+  uint8_t       task_stack[CONFIG_THREAD_BLE_SVC_DIS_STACK_SIZE];
   EventGroupHandle_t event_flag;
   uint8_t       is_discovering;
   uint8_t       is_connected;
@@ -42,7 +50,9 @@ static struct
 {
   .is_connected = false,
 };
-// Private functions prototype
+/*************************************************************************************/
+/*                            PRIVATE FUNCTION PROTOTYPE                             */
+/*************************************************************************************/
 static void ble_svc_dis_gattc_cb(ble_evt_t evt);
 static void ble_svc_dis_gap_cb(ble_evt_t evt);
 static void ble_svc_dis_thread_entry(void * param);
@@ -53,7 +63,9 @@ static void ble_svc_dis_char();
 static void ble_svc_dis_desc();
 static void ble_svc_dis_subcribe();
 static void ble_svc_dis_handle_disconnect();
-// Public functions
+/*************************************************************************************/
+/*                                  PUBLIC FUNCTION                                  */
+/*************************************************************************************/
 void ble_svc_dis_init()
 {
   BLE_SVC_DIS_LOGI("BLE_SVC_DIS_INIT");
@@ -63,13 +75,14 @@ void ble_svc_dis_init()
   ble_gap_register_cb(ble_svc_dis_gap_cb);
   ble_gattc_register_cb(ble_svc_dis_gattc_cb);
   ble_svc_dis.task_handle  = xTaskCreateStatic(ble_svc_dis_thread_entry,
-                                               "BLE_SVC_DIS",
-                                               BLE_SVC_DIS_STACK_SIZE,
+                                               CONFIG_THREAD_BLE_SVC_DIS_NAME,
+                                               CONFIG_THREAD_BLE_SVC_DIS_STACK_SIZE,
                                                NULL,
-                                               2,
+                                               CONFIG_THREAD_BLE_SVC_DIS_PRIORITY,
                                                ble_svc_dis.task_stack,
                                                &(ble_svc_dis.task_buffer));
 }
+
 void ble_svc_dis_request(ble_svc_dis_t svc)
 {
   if(ble_svc_dis.is_connected)
@@ -106,8 +119,9 @@ void ble_svc_dis_reset(ble_svc_t * svc)
     }
   }
 }
-// Private functions
-
+/*************************************************************************************/
+/*                                 PRIVATE FUNCTION                                  */
+/*************************************************************************************/
 static void ble_svc_dis_thread_entry(void * param)
 {
   while(1)
@@ -403,3 +417,4 @@ static void ble_svc_dis_handle_disconnect()
     }
   }
 }
+

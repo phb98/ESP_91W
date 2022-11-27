@@ -2,6 +2,7 @@
 #include "lvgl.h"
 #include "SSD1306.h"
 #include "SSD1306_conf.h"
+#include "thread_config.h"
 #include "freertos/FreeRTOSConfig.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/queue.h"
@@ -11,7 +12,7 @@ static lv_color_t  disp_buf_draw_A[OLED_WIDTH*OLED_HEIGHT];
 static lv_color_t  disp_buf_draw_B[OLED_WIDTH*OLED_HEIGHT];
 lv_disp_drv_t disp_drv;                 /*A variable to hold the drivers. Can be local variable*/
 lv_disp_t * disp;
-static uint8_t display_stack[8192];
+static uint8_t display_stack[CONFIG_THREAD_DISPLAY_STACK_SIZE];
 static StaticTask_t display_thread_handle;
 
 // PRIVATE FUNCTION PROTOTYPE
@@ -23,6 +24,7 @@ void display_init()
   // init lvgl and display
   display_lvgl_init();
   ssd1306_init();
+  // Init driver
   lv_disp_draw_buf_init(&disp_buf, disp_buf_draw_A, disp_buf_draw_B, OLED_WIDTH*OLED_HEIGHT);
   lv_disp_drv_init(&disp_drv);            /*Basic initialization*/
   disp_drv.draw_buf = &disp_buf;            /*Set an initialized buffer*/
@@ -37,10 +39,10 @@ void display_init()
   disp = lv_disp_drv_register(&disp_drv); /*Register the driver and save the created display objects*/
   // Create thread to run LVGL task
   xTaskCreateStatic(display_thread,
-                    "Display_thread",
-                    sizeof(display_stack),
+                    CONFIG_THREAD_DISPLAY_NAME,
+                    CONFIG_THREAD_DISPLAY_STACK_SIZE,
                     NULL,
-                    1,
+                    CONFIG_THREAD_DISPLAY_PRIORITY,
                     display_stack,
                     &display_thread_handle);
 }
