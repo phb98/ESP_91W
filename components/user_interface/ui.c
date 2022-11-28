@@ -45,7 +45,7 @@ void ui_init()
 /*************************************************************************************/
 static void ui_thread_entry(void * param)
 {
-
+  while(1) vTaskDelay(10);
 }
 
 

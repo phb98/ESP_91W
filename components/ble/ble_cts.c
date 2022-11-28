@@ -11,6 +11,9 @@
 #include "esp_log.h"
 #include "string.h"
 #include "ble_svc_dis.h"
+#include <time.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 // CONSTANT AND MACRO DEFINE
 #define BLE_CTS_LOGI(...) ESP_LOGI("BLE_CTS",__VA_ARGS__)
 #define INVALID_CHAR_HANDLE             (0xffff)
@@ -29,6 +32,7 @@ static struct
   ble_svc_t cts_service;
   ble_char_t cts_chars[CTS_NUM_CHAR];
   ble_cts_time_t current_time;
+  uint64_t   tick_when_time_update;
 } ble_cts = 
 {
   .is_discovered = false,
@@ -57,6 +61,7 @@ static void ble_cts_start_service_discover();
 static void ble_cts_service_discover_cb(ble_svc_dis_status_t status);
 static void ble_cts_parse_current_time(uint8_t *buf, size_t buf_len);
 static void ble_cts_service_reset();
+static void ble_cts_update_time_from_tick();
 // PUBLIC FUNCTIONS
 void ble_cts_init()
 {
@@ -68,6 +73,8 @@ void ble_cts_init()
 
 ble_cts_time_t ble_cts_get_time() 
 {
+  // Update current time
+  ble_cts_update_time_from_tick();
   return (ble_cts.current_time);
 }
 // PRIVATE FUNCTIONS
@@ -128,10 +135,46 @@ static void ble_cts_parse_current_time(uint8_t *buf, size_t buf_len)
   if(!buf || buf_len == 0) return;
   // Update current date time
   memcpy(&ble_cts.current_time, buf, sizeof(ble_cts_time_t) < buf_len ? sizeof(ble_cts_time_t) : buf_len);
-  
+  ble_cts.tick_when_time_update = xTaskGetTickCount();
   BLE_CTS_LOGI("Current day: %d/%d/%d", ble_cts.current_time.year, ble_cts.current_time.mon, ble_cts.current_time.day);
   BLE_CTS_LOGI("Current time: %d:%d:%d", ble_cts.current_time.hour, ble_cts.current_time.min, ble_cts.current_time.sec);
 }
+
+
+static void ble_cts_update_time_from_tick()
+{
+  uint64_t delta_tick = xTaskGetTickCount() - ble_cts.tick_when_time_update;
+  uint64_t delta_ms = delta_tick * (portTICK_PERIOD_MS);
+  uint64_t delta_s = delta_ms / 1000;
+  if(delta_s > 0)
+  {
+    struct tm current_time = 
+    {
+      .tm_hour = ble_cts.current_time.hour,
+      .tm_min  = ble_cts.current_time.min,
+      .tm_sec  = ble_cts.current_time.sec,
+      .tm_year = ble_cts.current_time.year - 1900,
+      .tm_mon  = ble_cts.current_time.mon - 1,
+      .tm_mday = ble_cts.current_time.day,
+      .tm_wday = ble_cts.current_time.dow,
+      .tm_isdst = -1,
+    };
+    time_t current_epoch = mktime(&current_time) + (time_t)delta_s;
+    struct tm * update_time = gmtime(&current_epoch);
+    // convert back to our formet 
+    ble_cts.current_time.hour = update_time->tm_hour;
+    ble_cts.current_time.min  = update_time->tm_min;  
+    ble_cts.current_time.sec  = update_time->tm_sec;   
+    ble_cts.current_time.year = update_time->tm_year + 1900;
+    ble_cts.current_time.mon  = update_time->tm_mon  + 1;
+    ble_cts.current_time.day  = update_time->tm_mday;
+    ble_cts.current_time.dow  = update_time->tm_wday; 
+    ble_cts.tick_when_time_update = xTaskGetTickCount();
+    BLE_CTS_LOGI("Current day: %d/%d/%d", ble_cts.current_time.year, ble_cts.current_time.mon, ble_cts.current_time.day);
+    BLE_CTS_LOGI("Current time: %d:%d:%d", ble_cts.current_time.hour, ble_cts.current_time.min, ble_cts.current_time.sec);
+  }
+}
+
 
 static void ble_cts_start_service_discover()
 {
