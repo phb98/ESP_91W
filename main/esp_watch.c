@@ -8,9 +8,10 @@
 #include "ble.h"
 #include "ble_cts.h"
 #include "ui.h"
+#include "lvgl_font.h"
 lv_obj_t *label2, *label1;
-LV_FONT_DECLARE(seg7_classic_mini_10);
-LV_FONT_DECLARE(seg7_classic_mini_16);
+//LV_FONT_DECLARE(seg7_classic_mini_10);
+//LV_FONT_DECLARE(seg7_classic_mini_16);
 
 void app_main(void)
 {
@@ -19,13 +20,13 @@ void app_main(void)
   ui_init();
   static lv_style_t label_style1, label_style2;
   lv_style_init(&label_style1);
-  lv_style_set_text_font(&label_style1, &seg7_classic_mini_10);
+  lv_style_set_text_font(&label_style1, &seven_seg_14_number);
   //label1 =  lv_label_create(lv_scr_act());
   //lv_obj_add_style(label1, &label_style1 ,LV_PART_MAIN | LV_STATE_DEFAULT);
   //lv_obj_set_pos(label1,40, 5);// position, position);
-
+  
   lv_style_init(&label_style2);
-  lv_style_set_text_font(&label_style2, &seg7_classic_mini_16);
+  //lv_style_set_text_font(&label_style2, &seg7_classic_mini_16);
   label2 =  lv_label_create(lv_scr_act());
   lv_obj_add_style(label2, &label_style2 ,LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_pos(label2,0, 0);// position, position);

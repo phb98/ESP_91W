@@ -6,6 +6,10 @@ cmake_minimum_required(VERSION 3.16)
 
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(esp_watch)
+idf_build_set_property(COMPILE_OPTIONS "-DLV_CONF_INCLUDE_SIMPLE" APPEND)
+idf_build_set_property(COMPILE_OPTIONS "-DLV_LVGL_H_INCLUDE_SIMPLE" APPEND)
+idf_build_set_property(COMPILE_OPTIONS "-I${PROJECT_SOURCE_DIR}/config" APPEND)
+
 include(${PROJECT_SOURCE_DIR}/common.cmake)
 include_directories(${PROJECT_SOURCE_DIR}/etc)
 include_directories(${PROJECT_SOURCE_DIR}/config)

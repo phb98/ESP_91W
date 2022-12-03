@@ -6,6 +6,7 @@ idf_component_register(SRCS "esp_watch.c"
                                      "${COMPONENT_PATH}/display"
                                      "${COMPONENT_PATH}/lvgl"
                                      "${COMPONENT_PATH}/user_interface"
+                                     "${COMPONENT_PATH}/lvgl_font"
                        REQUIRES      "lvgl"
                                      "ble")
                                      
