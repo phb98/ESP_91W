@@ -1,4 +1,3 @@
-include("../etc/common.cmake")
 set(COMPONENT_PATH "../components")
 idf_component_register(SRCS "esp_watch.c"
                        INCLUDE_DIRS  "."
