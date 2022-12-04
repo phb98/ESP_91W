@@ -14,6 +14,8 @@
 #include <time.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "ui.h"
+#include "ui_def.h"
 // CONSTANT AND MACRO DEFINE
 #define BLE_CTS_LOGI(...) ESP_LOGI("BLE_CTS",__VA_ARGS__)
 #define INVALID_CHAR_HANDLE             (0xffff)
@@ -138,6 +140,19 @@ static void ble_cts_parse_current_time(uint8_t *buf, size_t buf_len)
   ble_cts.tick_when_time_update = xTaskGetTickCount();
   BLE_CTS_LOGI("Current day: %d/%d/%d", ble_cts.current_time.year, ble_cts.current_time.mon, ble_cts.current_time.day);
   BLE_CTS_LOGI("Current time: %d:%d:%d", ble_cts.current_time.hour, ble_cts.current_time.min, ble_cts.current_time.sec);
+  // Post it to ui
+  ui_input_t time_update = 
+  {
+    .evt = UI_EVT_TIME_UPDATE,
+    .param.time_update.year  =  ble_cts.current_time.year,
+    .param.time_update.month =  ble_cts.current_time.mon,
+    .param.time_update.day   =  ble_cts.current_time.day,
+    .param.time_update.hour  =  ble_cts.current_time.hour,
+    .param.time_update.min   =  ble_cts.current_time.min,
+    .param.time_update.sec   =  ble_cts.current_time.sec,
+    .param_length            =  sizeof(ui_time_update_t)
+  };
+  ui_input_handle(&time_update);
 }
 
 

@@ -51,8 +51,8 @@ static void display_thread(void * param)
 {
   while(1)
   {
-    vTaskDelay(10/portTICK_PERIOD_MS);
-    lv_tick_inc(10);
+    vTaskDelay(30/portTICK_PERIOD_MS);
+    lv_tick_inc(30);
     lv_timer_handler();
   }
 }

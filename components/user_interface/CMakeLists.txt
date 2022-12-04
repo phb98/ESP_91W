@@ -7,10 +7,12 @@ list(APPEND UI_SOURCE ${UI_NODE_SOURCE})
 
 set(UI_INCLUDE_DIRS "."
                     "../lvgl"
+                    "../lvgl_font"
                     "../SSD1306"
                     "../../config"
                     "../../etc"
-                    "../ble")
+                    "../ble"
+                    "./nodes")
                     
 idf_component_register(SRCS          ${UI_SOURCE}
                        INCLUDE_DIRS  ${UI_INCLUDE_DIRS}

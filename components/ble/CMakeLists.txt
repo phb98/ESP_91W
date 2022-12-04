@@ -5,5 +5,6 @@ idf_component_register(SRCS ${BLE_SOURCE}
                                      "../SSD1306"
                                      "../../config"
                                      "../../etc"
+                                     "../user_interface"
                       REQUIRES      "nvs_flash"
                                     "bt")

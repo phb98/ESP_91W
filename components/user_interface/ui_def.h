@@ -1,25 +1,32 @@
 #ifndef _UI_DEF_H
 #define _UI_DEF_H
 #include <stdint.h>
-typedef enum
-{
-  UI_EVT_INIT = 1,
-  UI_EVT_TIME_UPDATE = 2,
-} ui_event_type_t;
+
 
 typedef enum
 {
-  NODE_CLASS_HOME,
-  NODE_CLASS_APP,
-} ui_node_class_t;
+  UI_EVT_SYS_INIT = 1,
+  UI_EVT_TIME_UPDATE = 2,
+  NUM_UI_EVT,
+} ui_input_evt_t;
+
 typedef struct
 {
-  ui_event_type_t evt;
-  union{
-    struct
-    {
-      
-    } raw;
+  uint8_t hour;
+  uint8_t min;
+  uint8_t sec;
+  uint16_t year;
+  uint8_t month;
+  uint8_t day;
+} ui_time_update_t;
+
+typedef struct
+{
+  ui_input_evt_t evt;
+  union
+  {
+    uint8_t raw[1];
+    ui_time_update_t time_update;
   } param;
   uint32_t param_length;
 } ui_input_t;
@@ -27,16 +34,14 @@ typedef struct
 typedef struct
 {
   uint8_t    request_draw;
-  ui_input_t re_input;
+  ui_input_t *re_input;
 
 } ui_output_t;
-typedef struct
+
+typedef enum
 {
-  struct {
-    char            *node_name;
-    ui_node_class_t node_class;
-  } node_info;
-  void (*run)(ui_input_t * input, ui_output_t * output);
-  void (*draw);
-} ui_node_t;
+  UI_RET_OK,
+  UI_RET_INVALID_PARAM,
+} ui_ret_t;
+
 #endif
