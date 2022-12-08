@@ -7,6 +7,7 @@ typedef enum
 {
   UI_EVT_SYS_INIT = 1,
   UI_EVT_TIME_UPDATE = 2,
+  UI_EVT_TIMER_EXPIRED = 3,
   NUM_UI_EVT,
 } ui_input_evt_t;
 
@@ -22,11 +23,17 @@ typedef struct
 
 typedef struct
 {
+  uint32_t crc;
+} ui_timer_expired_t;
+
+typedef struct
+{
   ui_input_evt_t evt;
   union
   {
     uint8_t raw[1];
     ui_time_update_t time_update;
+    ui_timer_expired_t timer_expired;
   } param;
   uint32_t param_length;
 } ui_input_t;

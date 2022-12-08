@@ -1,5 +1,6 @@
 #include "ui.h"
 #include "ui_def.h"
+#include "ui_timer.h"
 #include "thread_config.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -39,6 +40,7 @@ static void ui_node_process_input(ui_node_t * p_child_node, ui_input_t * input, 
 void ui_init()
 {
   UI_LOGI("UI INIT");
+  ui_timer_init();
   // Init child node
   home_screen_init();
   // Create Queue and Thread UI
@@ -95,7 +97,7 @@ static void ui_thread_entry(void * param)
     UI_LOGI("Receive event:%d", input_evt.evt);
     // Pass the input to all child node
     ui_output_t node_output;
-    lv_obj_t * p_parent = lv_obj_create(lv_scr_act());
+    lv_obj_t * p_parent = lv_scr_act();
 
     for(int i = 0; i < ui.num_child_node; i++)
     {

@@ -17,6 +17,8 @@ set(UI_INCLUDE_DIRS "."
 idf_component_register(SRCS          ${UI_SOURCE}
                        INCLUDE_DIRS  ${UI_INCLUDE_DIRS}
                        REQUIRES      "nvs_flash"
-                                    " bt")
+                                     " bt"
+                                     "lvgl_font"
+                                     "lvgl")
 
                                      
