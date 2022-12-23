@@ -1,6 +1,7 @@
 #ifndef _BLE_SVC_DIS_H
 #define _BLE_SVC_DIS_H
 #include "ble.h"
+#define INVALID_CHAR_HANDLE             (0xffff)
 
 typedef enum
 {

@@ -18,7 +18,6 @@
 #include "ui_def.h"
 // CONSTANT AND MACRO DEFINE
 #define BLE_CTS_LOGI(...) ESP_LOGI("BLE_CTS",__VA_ARGS__)
-#define INVALID_CHAR_HANDLE             (0xffff)
 #define BLE_CTS_SERVICE_UUID            (0x1805)
 #define BLE_CTS_CURRENT_TIME_CHAR_UUID  (0x2A2B)
 
