@@ -24,6 +24,8 @@
 #define MAX_NUM_GATTC_CB    (10)
 #define MAX_NUM_GAP_CB      (10)
 #define QUEUE_NUM_ELEMENTS  (32)
+#define BLE_LOGI(...) ESP_LOGI("BLE",__VA_ARGS__)
+
 // MODULE TYPE
 
 ble_evt_cb_t gattc_cb_table[MAX_NUM_GATTC_CB];
@@ -140,6 +142,7 @@ static void ble_sec_init()
 
 static void ble_stack_init()
 {
+  BLE_LOGI("Init BLE");
   esp_err_t ret;
   // Initialize NVS.
   ret = nvs_flash_init();
@@ -151,9 +154,9 @@ static void ble_stack_init()
   esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
 
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-  esp_bt_controller_init(&bt_cfg);
-  esp_bt_controller_enable(ESP_BT_MODE_BLE);
-  esp_bluedroid_init();
+  BLE_LOGI("esp_bt_controller_init:%d", esp_bt_controller_init(&bt_cfg));
+  BLE_LOGI("esp_bt_controller_enable:%d",esp_bt_controller_enable(ESP_BT_MODE_BLE));
+  BLE_LOGI("esp_bluedroid_init:%d",esp_bluedroid_init());
   esp_bluedroid_enable();
 }
 
@@ -168,7 +171,7 @@ static void ble_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp
       ble.gattc.conn_id  = param->open.conn_id;
       esp_ble_set_encryption(param->open.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
       esp_ble_gattc_send_mtu_req(gattc_if, param->open.conn_id);
-      esp_ble_gap_set_pkt_data_len(ble.remote_addr, 250);
+      //esp_ble_gap_set_pkt_data_len(ble.remote_addr, 250);
       break;
     case ESP_GATTC_CONNECT_EVT:
       // this to make device bond after connecting
@@ -193,6 +196,7 @@ static void ble_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
       ble.current_state = BLE_STATE_ADVERTISING;
       break;
     case ESP_GAP_BLE_AUTH_CMPL_EVT:
+      esp_ble_gap_set_pkt_data_len(ble.remote_addr, 250);
       ble.current_state = BLE_STATE_PAIRED;
       ESP_LOGI("BLE","Authentication complete\r\n");
       break;
