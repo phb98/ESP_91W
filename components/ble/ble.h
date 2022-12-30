@@ -47,12 +47,15 @@ typedef struct
   uint16_t num_char;
   char * svc_name;
 } ble_svc_t;
+
 typedef void (*ble_evt_cb_t)(ble_evt_t evt);
+
 void ble_init();
 void ble_gattc_register_cb(ble_evt_cb_t cb);
 void ble_gap_register_cb(ble_evt_cb_t cb);
 uint8_t * ble_get_gattc_remote_bda();
 uint16_t ble_get_gattc_if();
-
 uint16_t ble_get_gattc_conn_id();
+ble_state_t ble_get_current_state();
+
 #endif

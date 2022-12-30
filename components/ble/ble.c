@@ -20,18 +20,23 @@
 #include <stdint.h>
 #include "ble_cts.h"
 #include "ble_svc_dis.h"
-//constant define
+/*************************************************************************************/
+/*                                  CONSTANT DEFINE                                  */
+/*************************************************************************************/
 #define MAX_NUM_GATTC_CB    (10)
 #define MAX_NUM_GAP_CB      (10)
 #define QUEUE_NUM_ELEMENTS  (32)
 #define BLE_LOGI(...) ESP_LOGI("BLE",__VA_ARGS__)
+/*************************************************************************************/
+/*                                    MODULE TYPE                                    */
+/*************************************************************************************/
 
-// MODULE TYPE
+/*************************************************************************************/
+/*                                  MODULE VARIABLE                                  */
+/*************************************************************************************/
+static ble_evt_cb_t gattc_cb_table[MAX_NUM_GATTC_CB];
+static ble_evt_cb_t gap_cb_table[MAX_NUM_GAP_CB];
 
-ble_evt_cb_t gattc_cb_table[MAX_NUM_GATTC_CB];
-ble_evt_cb_t gap_cb_table[MAX_NUM_GAP_CB];
-
-// MODULE VARIABLE 
 static struct
 {
   ble_state_t current_state;
@@ -47,15 +52,18 @@ static struct
   // uint8_t      thread_stack[8192];
   // QueueHandle_t evt_queue;
 } ble;
-
-// PRIVATE FUNCTION PROTOTYPE
+/*************************************************************************************/
+/*                            PRIVATE FUNCTION PROTOTYPE                             */
+/*************************************************************************************/
 static void ble_stack_init();
 static void ble_sec_init();
 static void ble_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param);
 static void ble_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
 static void ble_gattc_evt_dispatch(esp_gattc_cb_event_t event, esp_ble_gattc_cb_param_t *param);
 static void ble_gap_evt_dispatch(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
-// PUBLIC FUNCTIONS
+/*************************************************************************************/
+/*                                  PUBLIC FUNCTION                                  */
+/*************************************************************************************/
 void ble_init()
 {
   // init some ble module
@@ -71,17 +79,6 @@ void ble_init()
   ble_cts_init();
 
   esp_ble_gatt_set_local_mtu(500);
-  //ble_adv_start();
-  // Create thread for handle event from stack
-  // xTaskCreateStatic(ble_thread_entry,
-  //                   "ble_thread",
-  //                   sizeof(ble.thread_stack),
-  //                   NULL,
-  //                   2,
-  //                   ble.thread_stack,
-  //                   &ble.thread_handle);
-  // // Create Queue for this 
-  // ble.evt_queue = xQueueCreate(QUEUE_NUM_ELEMENTS, sizeof()
 }
 
 uint16_t ble_get_gattc_if()
@@ -113,7 +110,13 @@ void ble_gap_register_cb(ble_evt_cb_t cb)
   ble.num_gap_cb_registered++;
 }
 
-// PRIVATE FUNCTIONS
+ble_state_t ble_get_current_state()
+{
+  return ble.current_state;
+}
+/*************************************************************************************/
+/*                                 PRIVATE FUNCTION                                  */
+/*************************************************************************************/
 static void ble_sec_init()
 {
   /* set the security iocap & auth_req & key size & init key response key parameters to the stack*/
@@ -234,3 +237,4 @@ static void ble_gap_evt_dispatch(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_pa
     if(gap_cb_table[i]) gap_cb_table[i](gap_evt);
   }
 }
+
