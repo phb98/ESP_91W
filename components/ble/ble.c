@@ -20,11 +20,14 @@
 #include <stdint.h>
 #include "ble_cts.h"
 #include "ble_svc_dis.h"
+#include "ble_dis.h"
 /*************************************************************************************/
 /*                                  CONSTANT DEFINE                                  */
 /*************************************************************************************/
 #define MAX_NUM_GATTC_CB    (10)
 #define MAX_NUM_GAP_CB      (10)
+#define MAX_NUM_GATTS_CB    (10)
+
 #define QUEUE_NUM_ELEMENTS  (32)
 #define BLE_LOGI(...) ESP_LOGI("BLE",__VA_ARGS__)
 /*************************************************************************************/
@@ -35,6 +38,7 @@
 /*                                  MODULE VARIABLE                                  */
 /*************************************************************************************/
 static ble_evt_cb_t gattc_cb_table[MAX_NUM_GATTC_CB];
+static ble_evt_cb_t gatts_cb_table[MAX_NUM_GATTC_CB];
 static ble_evt_cb_t gap_cb_table[MAX_NUM_GAP_CB];
 
 static struct
@@ -45,8 +49,13 @@ static struct
     uint16_t interface;
     uint16_t conn_id;
   } gattc;
+  struct
+  {
+    uint16_t interface;
+  } gatts;
   uint8_t remote_addr[6];
   uint8_t num_gattc_cb_registered;
+  uint8_t num_gatts_cb_registered;
   uint8_t num_gap_cb_registered;
   // StaticTask_t thread_handle;
   // uint8_t      thread_stack[8192];
@@ -58,7 +67,9 @@ static struct
 static void ble_stack_init();
 static void ble_sec_init();
 static void ble_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp_ble_gattc_cb_param_t *param);
+static void ble_gatts_cb(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param);
 static void ble_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
+static void ble_gatts_evt_dispatch(esp_gatts_cb_event_t event, esp_ble_gatts_cb_param_t *param);
 static void ble_gattc_evt_dispatch(esp_gattc_cb_event_t event, esp_ble_gattc_cb_param_t *param);
 static void ble_gap_evt_dispatch(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param);
 /*************************************************************************************/
@@ -71,13 +82,17 @@ void ble_init()
   // register callback
   esp_ble_gap_register_callback(ble_gap_cb);
   esp_ble_gattc_register_callback(ble_gattc_cb);
+  esp_ble_gatts_register_callback(ble_gatts_cb);
   esp_ble_gattc_app_register(CONFIG_BLE_GATTC_APP_ID);
+  esp_ble_gatts_app_register(CONFIG_BLE_GATTS_APP_ID);
   // Init ble App module
   ble_sec_init();
   ble_svc_dis_init(); // Init before other service
   ble_adv_init();
   ble_cts_init();
 
+  ble_dis_init();
+  
   esp_ble_gatt_set_local_mtu(500);
 }
 
@@ -89,7 +104,6 @@ uint16_t ble_get_gattc_if()
 uint16_t ble_get_gattc_conn_id()
 {
   return ble.gattc.conn_id;
-
 }
 
 uint8_t * ble_get_gattc_remote_bda()
@@ -103,6 +117,13 @@ void ble_gattc_register_cb(ble_evt_cb_t cb)
   ble.num_gattc_cb_registered++;
 }
 
+void ble_gatts_register_cb(ble_evt_cb_t cb)
+{
+  if(ble.num_gatts_cb_registered >= MAX_NUM_GATTS_CB) return;
+  gatts_cb_table[ble.num_gatts_cb_registered] = cb;
+  ble.num_gatts_cb_registered++;
+}
+
 void ble_gap_register_cb(ble_evt_cb_t cb)
 {
   if(ble.num_gap_cb_registered >= MAX_NUM_GAP_CB) return;
@@ -113,6 +134,11 @@ void ble_gap_register_cb(ble_evt_cb_t cb)
 ble_state_t ble_get_current_state()
 {
   return ble.current_state;
+}
+
+uint16_t ble_get_gatts_if()
+{
+  return ble.gatts.interface;
 }
 /*************************************************************************************/
 /*                                 PRIVATE FUNCTION                                  */
@@ -191,6 +217,20 @@ static void ble_gattc_cb(esp_gattc_cb_event_t event, esp_gatt_if_t gattc_if, esp
   ble_gattc_evt_dispatch(event, param);
 }
 
+static void ble_gatts_cb(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp_ble_gatts_cb_param_t *param)
+{
+  switch(event)
+  {
+    case ESP_GATTS_REG_EVT:
+      if(param->reg.status == ESP_GATT_OK) ble.gatts.interface = gatts_if;
+      else BLE_LOGI("GATTS reg failed:%d", param->reg.status);
+    default:
+      break;
+  }
+  ble_gatts_evt_dispatch(event, param);
+
+}
+
 static void ble_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *param)
 {
   switch(event)
@@ -221,6 +261,20 @@ static void ble_gattc_evt_dispatch(esp_gattc_cb_event_t event, esp_ble_gattc_cb_
   for(uint8_t i = 0; i < ble.num_gattc_cb_registered; i++)
   {
     if(gattc_cb_table[i]) gattc_cb_table[i](gattc_evt);
+  }
+}
+
+static void ble_gatts_evt_dispatch(esp_gatts_cb_event_t event, esp_ble_gatts_cb_param_t *param)
+{
+  //printf("ble gattc dispatch:%d num cb\r\n", ble.num_gattc_cb_registered);
+  ble_evt_t gatts_evt = 
+  {
+    .gatts_evt = event,
+    .gatts_param = param
+  };
+  for(uint8_t i = 0; i < ble.num_gatts_cb_registered; i++)
+  {
+    if(gatts_cb_table[i]) gatts_cb_table[i](gatts_evt);
   }
 }
 

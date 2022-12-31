@@ -4,4 +4,6 @@
 #define CONFIG_ADV_INTERVAL           (1600) // 1s
 
 #define CONFIG_BLE_GATTC_APP_ID      (0)
+#define CONFIG_BLE_GATTS_APP_ID      (1)
+
 #endif
