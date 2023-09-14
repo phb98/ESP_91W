@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include "ble_cts.h"
 #include "ble_svc_dis.h"
-#include "ble_dis.h"
+// #include "ble_dis.h"
 /*************************************************************************************/
 /*                                  CONSTANT DEFINE                                  */
 /*************************************************************************************/
@@ -91,7 +91,7 @@ void ble_init()
   ble_adv_init();
   ble_cts_init();
 
-  ble_dis_init();
+  // ble_dis_init();
   
   esp_ble_gatt_set_local_mtu(500);
 }
