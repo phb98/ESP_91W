@@ -1,10 +1,10 @@
 #include "ble.h"
+#include "ble_log.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/event_groups.h"
 #include "freertos/queue.h"
 #include "esp_system.h"
-#include "esp_log.h"
 #include "nvs_flash.h"
 #include "esp_bt.h"
 
@@ -18,8 +18,10 @@
 #include "ble_config.h"
 #include "ble_adv.h"
 #include <stdint.h>
-#include "ble_cts.h"
 #include "ble_svc_dis.h"
+#include "gattc/ble_disc.h"
+#include "gattc/ble_cts.h"
+
 // #include "ble_dis.h"
 /*************************************************************************************/
 /*                                  CONSTANT DEFINE                                  */
@@ -28,8 +30,6 @@
 #define MAX_NUM_GAP_CB      (10)
 #define MAX_NUM_GATTS_CB    (10)
 
-#define QUEUE_NUM_ELEMENTS  (32)
-#define BLE_LOGI(...) ESP_LOGI("BLE",__VA_ARGS__)
 /*************************************************************************************/
 /*                                    MODULE TYPE                                    */
 /*************************************************************************************/
@@ -85,15 +85,10 @@ void ble_init()
   esp_ble_gatts_register_callback(ble_gatts_cb);
   esp_ble_gattc_app_register(CONFIG_BLE_GATTC_APP_ID);
   esp_ble_gatts_app_register(CONFIG_BLE_GATTS_APP_ID);
-  // Init ble App module
-  ble_sec_init();
-  ble_svc_dis_init(); // Init before other service
   ble_adv_init();
-  ble_cts_init();
-
-  // ble_dis_init();
-  
   esp_ble_gatt_set_local_mtu(500);
+  ble_disc_init();
+  ble_cts_init();
 }
 
 uint16_t ble_get_gattc_if()
@@ -171,7 +166,7 @@ static void ble_sec_init()
 
 static void ble_stack_init()
 {
-  BLE_LOGI("Init BLE");
+  BLE_INFO("Init BLE");
   esp_err_t ret;
   // Initialize NVS.
   ret = nvs_flash_init();
@@ -183,9 +178,9 @@ static void ble_stack_init()
   esp_bt_controller_mem_release(ESP_BT_MODE_CLASSIC_BT);
 
   esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
-  BLE_LOGI("esp_bt_controller_init:%d", esp_bt_controller_init(&bt_cfg));
-  BLE_LOGI("esp_bt_controller_enable:%d",esp_bt_controller_enable(ESP_BT_MODE_BLE));
-  BLE_LOGI("esp_bluedroid_init:%d",esp_bluedroid_init());
+  BLE_INFO("esp_bt_controller_init:%d", esp_bt_controller_init(&bt_cfg));
+  BLE_INFO("esp_bt_controller_enable:%d",esp_bt_controller_enable(ESP_BT_MODE_BLE));
+  BLE_INFO("esp_bluedroid_init:%d",esp_bluedroid_init());
   esp_bluedroid_enable();
 }
 
@@ -223,7 +218,7 @@ static void ble_gatts_cb(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if, esp
   {
     case ESP_GATTS_REG_EVT:
       if(param->reg.status == ESP_GATT_OK) ble.gatts.interface = gatts_if;
-      else BLE_LOGI("GATTS reg failed:%d", param->reg.status);
+      else BLE_INFO("GATTS reg failed:%d", param->reg.status);
     default:
       break;
   }
@@ -236,12 +231,13 @@ static void ble_gap_cb(esp_gap_ble_cb_event_t event, esp_ble_gap_cb_param_t *par
   switch(event)
   {
     case ESP_GAP_BLE_ADV_START_COMPLETE_EVT:
+      BLE_INFO("ADV START COMPLETE");
       ble.current_state = BLE_STATE_ADVERTISING;
       break;
     case ESP_GAP_BLE_AUTH_CMPL_EVT:
       esp_ble_gap_set_pkt_data_len(ble.remote_addr, 250);
       ble.current_state = BLE_STATE_PAIRED;
-      ESP_LOGI("BLE","Authentication complete\r\n");
+      BLE_INFO("Authentication complete\r\n");
       break;
     default:
       break;

@@ -1,4 +1,5 @@
-file(GLOB_RECURSE BLE_SOURCE "ble*.c")
+file(GLOB_RECURSE BLE_SOURCE "ble*.c"
+                             "gattc/ble*.c")
 idf_component_register(SRCS ${BLE_SOURCE}
                       INCLUDE_DIRS  "."
                                      "../lvgl"

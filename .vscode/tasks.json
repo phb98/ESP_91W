@@ -1,0 +1,33 @@
+{
+  "tasks": [
+  {
+    "type": "shell",
+    "options": 
+    {
+      "cwd": "${workspaceRoot}",
+    },
+   "command":"cd esp-idf; source export.sh; cd ..; idf.py build",
+   "label": "eps_idf_build",
+   "group": "build",
+  },
+  {
+    "type": "shell",
+    "options": 
+    {
+      "cwd": "${workspaceRoot}",
+    },
+   "command":"cd esp-idf; source export.sh; cd ..; idf.py fullclean; idf.py build",
+   "label": "eps_idf_rebuild",
+   "group": "build",
+  },
+  {
+    "type": "shell",
+    "options": 
+    {
+      "cwd": "${workspaceRoot}",
+    },
+   "command":"cd esp-idf; source export.sh; cd ..; idf.py flash monitor",
+   "label": "eps_idf flash monitor",
+   "group": "build"
+  }]
+}

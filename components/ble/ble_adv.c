@@ -7,9 +7,8 @@
 #include "esp_gatt_defs.h"
 #include "esp_gatt_common_api.h"
 #include "ble_config.h"
-#include "esp_log.h"
+#include "ble_log.h"
 #include "ble.h"
-#define BLE_ADV_LOG(...) printf(__VA_ARGS__)
 static esp_ble_adv_data_t adv_config = {
   .set_scan_rsp = false,
   .include_txpower = false,
@@ -54,7 +53,7 @@ void ble_adv_init()
 void ble_adv_start()
 {
   esp_ble_gap_start_advertising(&adv_params);
-  BLE_ADV_LOG("Start Advertising\r\n");
+  BLE_INFO("Start Advertising\r\n");
 }
 
 static void ble_adv_gap_cb(ble_evt_t evt)
@@ -75,7 +74,6 @@ static void ble_adv_gattc_cb(ble_evt_t evt)
 {
   esp_gattc_cb_event_t      event = evt.gattc_evt; 
   esp_ble_gattc_cb_param_t *param = evt.gattc_param;
-  //BLE_ADV_LOG("gattc evt:%d\r\n", event);
   switch(event)
   {
     case ESP_GATTC_DISCONNECT_EVT:

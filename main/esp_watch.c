@@ -6,7 +6,6 @@
 #include "freertos/task.h"
 #include "lv_conf.h"
 #include "ble.h"
-#include "ble_cts.h"
 #include "ui.h"
 #include "lvgl_font.h"
 lv_obj_t *label2, *label1;
