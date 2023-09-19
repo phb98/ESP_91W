@@ -37,20 +37,21 @@ Module:       ble_def.h
 //###########################################################################################################
 // DEFINED TYPES
 //###########################################################################################################
-typedef uint16_t ble_char_hdl_t;
-typedef uint8_t  ble_char_prop_t;
+typedef uint16_t      ble_char_hdl_t;
+typedef uint8_t       ble_char_prop_t;
+typedef esp_bt_uuid_t ble_uuid_t;
 typedef struct
 {
   ble_char_hdl_t  hdl;
-  esp_bt_uuid_t   uuid;
+  ble_uuid_t      uuid;
   ble_char_prop_t prop;
 }ble_char_t;
 typedef struct
 {
   const char * const svc_name;
-  const esp_bt_uuid_t svc_uuid;
-  ble_char_hdl_t start_hdl;
-  ble_char_hdl_t end_hdl;
+  const ble_uuid_t   svc_uuid;
+  ble_char_hdl_t     start_hdl;
+  ble_char_hdl_t      end_hdl;
   ble_char_t * const char_list;
   uint16_t num_char;
 } ble_svc_t;
