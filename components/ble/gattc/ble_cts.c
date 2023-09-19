@@ -12,7 +12,7 @@
 
 //###########################################################################################################
 // MODULE VARIABLES
-
+static ble_char_t cts_chars[]; // array of characteristics
 static struct 
 {
   ble_svc_t cts_service;
@@ -20,10 +20,10 @@ static struct
 {
   .cts_service = 
   {
-    .svc_name = "Current Time Service",
-    .svc_uuid = BLE_UUID_DECLARE_16(CTS_SERVICE_UUID),
+    .svc_name  = "Current Time Service",
+    .svc_uuid  = BLE_UUID_DECLARE_16(CTS_SERVICE_UUID),
     .start_hdl = BLE_INVALID_CHAR_HDL,
-    .end_hdl = BLE_INVALID_CHAR_HDL,
+    .end_hdl   = BLE_INVALID_CHAR_HDL,
     .char_list = NULL,
   }
 };
@@ -44,7 +44,6 @@ void ble_cts_init()
 //###########################################################################################################
 static void ble_cts_cb()
 {
-  
 }
 // ble_cts_time_t ble_cts_get_time() 
 // {
